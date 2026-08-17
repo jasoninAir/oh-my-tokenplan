@@ -1,5 +1,6 @@
-"""pytest fixtures for bin/agents tests."""
+"""pytest fixtures for bin/agentrace tests."""
 import shutil
+import sys
 from pathlib import Path
 
 import pytest
@@ -18,14 +19,14 @@ def sample_project(tmp_path: Path) -> Path:
 
 @pytest.fixture
 def run_agents():
-    """返回在指定项目目录运行 bin/agents 的辅助函数。"""
+    """返回在指定项目目录运行 bin/agentrace 的辅助函数。"""
     import subprocess
 
-    BIN = Path(__file__).parent.parent / "agents"
+    BIN = Path(__file__).parent.parent / "agentrace"
 
     def _run(project: Path, *args: str) -> subprocess.CompletedProcess:
         return subprocess.run(
-            [str(BIN), *args],
+            [sys.executable, str(BIN), *args],
             cwd=project,
             capture_output=True,
             text=True,

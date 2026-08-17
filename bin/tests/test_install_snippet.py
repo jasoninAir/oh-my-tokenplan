@@ -1,4 +1,4 @@
-"""测试 bin/agents install-snippet。"""
+"""测试 bin/agentrace install-snippet。"""
 from pathlib import Path
 
 
@@ -15,14 +15,14 @@ def test_install_snippet_creates_marker(tmp_path, monkeypatch, run_agents):
     snippet_dir = tmp_path / "adapters/snippets"
     snippet_dir.mkdir(parents=True)
     (snippet_dir / "claude.md").write_text(
-        "<!-- BEGIN multiagent-protocol v0.1 -->\nclaude snippet content\n<!-- END multiagent-protocol v0.1 -->\n"
+        "<!-- BEGIN agentrace-protocol v0.1 -->\nclaude snippet content\n<!-- END agentrace-protocol v0.1 -->\n"
     )
     result = run_agents(tmp_path, "install-snippet", "--agent", "claude")
     assert result.returncode == 0, f"stdout={result.stdout!r} stderr={result.stderr!r}"
 
     installed = (fake_claude / "CLAUDE.md").read_text()
-    assert "BEGIN multiagent-protocol" in installed
-    assert "END multiagent-protocol" in installed
+    assert "BEGIN agentrace-protocol" in installed
+    assert "END agentrace-protocol" in installed
 
 
 def test_install_snippet_idempotent(tmp_path, monkeypatch, run_agents):
@@ -37,7 +37,7 @@ def test_install_snippet_idempotent(tmp_path, monkeypatch, run_agents):
     snippet_dir = tmp_path / "adapters/snippets"
     snippet_dir.mkdir(parents=True)
     (snippet_dir / "claude.md").write_text(
-        "<!-- BEGIN multiagent-protocol v0.1 -->\nclaude snippet content\n<!-- END multiagent-protocol v0.1 -->\n"
+        "<!-- BEGIN agentrace-protocol v0.1 -->\nclaude snippet content\n<!-- END agentrace-protocol v0.1 -->\n"
     )
     run_agents(tmp_path, "install-snippet", "--agent", "claude")
     first_content = (fake_claude / "CLAUDE.md").read_text()

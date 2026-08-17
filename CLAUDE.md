@@ -2,25 +2,25 @@
 
 <!-- 主约定在 ./AGENTS.md，先读它。 -->
 
-本项目遵循 multiagent 协议 v0.1。
+本项目遵循 agentrace v0.1。
 
 ## 工作流（接入 30 秒）
 
-1. 跑 `bin/agents resume`（如有中断现场）或直接 Read `AGENTS.md`
-2. Read `docs/agents/stories/` 中 `status: in_progress` 的 Story
-3. Read `docs/agents/handbook/story-lifecycle.md` 了解状态机
-4. `bin/agents check` 一次确保环境干净
+1. 跑 `bin/agentrace resume`（如有中断现场）或直接 Read `AGENTS.md`
+2. Read `docs/agentrace/stories/` 中 `status: in_progress` 的 Story
+3. Read `docs/agentrace/handbook/story-lifecycle.md` 了解状态机
+4. `bin/agentrace check` 一次确保环境干净
 5. 干活，commit message 含 `(S-NNN)`
 
 ## Reviewer 边界
 
-- 只写 `docs/agents/reviews/`、`inbox/`、`decisions/`
+- 只写 `docs/agentrace/reviews/`、`inbox/`、`decisions/`
 - 不改 `src/` 等代码
-- 不改 `stories/<id>.md` 的 `status:` 字段（必须 `bin/agents advance`）
+- 不改 `stories/<id>.md` 的 `status:` 字段（必须 `bin/agentrace advance`）
 
 ## Claude Code 风味
 
-- 优先用 `Skill` 工具调预置工作流（`.claude/skills/agents/SKILL.md`）
+- 优先用 `Skill` 工具调预置工作流（`.claude/skills/agentrace/SKILL.md`）
 - 派子任务用 `Agent` 工具
 - 改文件前先 `Grep` 定位，避免盲改
 

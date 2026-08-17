@@ -1,6 +1,6 @@
 # Inbox
 
-跨 Agent 的临时便条。**不阻塞** Story，但被 `bin/agents check` 跟踪。
+跨 Agent 的临时便条。**不阻塞** Story，但被 `bin/agentrace check` 跟踪。
 
 ## 何时写
 
@@ -13,7 +13,7 @@
 
 每周或在 Story 推进时扫一次：
 
-- 可执行 → 转成 Story（`bin/agents new-story`，inbox 条目链接过去）
+- 可执行 → 转成 Story（`bin/agentrace new-story`，inbox 条目链接过去）
 - 不可执行 → 留在这里，加 `#hold` 或 `#wontfix` 标签
 - 已解决 → 删除或归档到 `inbox/archive/`
 
@@ -43,6 +43,6 @@ status: open                 # open / hold / wontfix / done
 
 ## 建议下一步
 
-- 转成 Story：bin/agents new-story
+- 转成 Story：bin/agentrace new-story
 - 或加 #hold / #wontfix
 ```

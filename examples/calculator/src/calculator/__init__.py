@@ -1,4 +1,4 @@
-"""multiagent 协议 demo: mini calculator."""
+"""agentrace demo: mini calculator."""
 from .core import (
     CalculatorError,
     NegativeExponentError,

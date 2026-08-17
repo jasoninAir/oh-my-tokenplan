@@ -37,6 +37,6 @@ blocked_by: ""
 
 ## 实现日志（changelog）
 
-<!-- bin/agents advance 会自动追加；不要手编辑本节 -->
+<!-- bin/agentrace advance 会自动追加；不要手编辑本节 -->
 
 - <YYYY-MM-DD HH:MM>  status: draft → planned

@@ -4,9 +4,9 @@
 
 Reviewer Agent **只能写**到：
 
-- `docs/agents/reviews/`
-- `docs/agents/inbox/`
-- `docs/agents/decisions/`（触发架构决策时）
+- `docs/agentrace/reviews/`
+- `docs/agentrace/inbox/`
+- `docs/agentrace/decisions/`（触发架构决策时）
 
 **不能**：
 
@@ -14,7 +14,7 @@ Reviewer Agent **只能写**到：
 - 改 `stories/<id>.md` 的 `status:` 字段
 - 改任何 commit
 
-边界由 `bin/agents check` 校验：commit author ≠ Story.assignee 且触及 `status:` 字段时告警"疑似 Reviewer 越权"。
+边界由 `bin/agentrace check` 校验：commit author ≠ Story.assignee 且触及 `status:` 字段时告警"疑似 Reviewer 越权"。
 
 ## Verdict 类型
 
@@ -45,7 +45,7 @@ verdict: ...
 
 Review 中遇到架构 / 接口 / 库选择类问题：
 
-1. 自动创建 `docs/agents/decisions/D-NNN-<slug>.md`
+1. 自动创建 `docs/agentrace/decisions/D-NNN-<slug>.md`
 2. 在 review body 的"关联"段引用 D-NNN
 3. 决策落地后（Decision 状态变 `accepted`），Reviewer 把 review verdict 改为 `approved`
 

@@ -6,14 +6,24 @@ author: claude-impl-A
 assignee: claude-impl-A
 created: 2026-08-13
 updated: 2026-08-16
-depends_on: [S-001]
+depends_on:
+- S-001
 blocks: []
-related_reviews: [R-002, R-003]
-related_commits: ["i7j8k9l", "m0n1o2p", "q3r4s5t"]
-impacted_symbols: [pow, ZeroDivisionError_, NegativeExponentError]
-tags: [core, errors]
+related_reviews:
+- R-002
+- R-003
+related_commits:
+- dee42f8
+- '1880027'
+impacted_symbols:
+- pow
+- ZeroDivisionError_
+- NegativeExponentError
+tags:
+- core
+- errors
 priority: P1
-blocked_by: ""
+blocked_by: ''
 ---
 
 ## 背景

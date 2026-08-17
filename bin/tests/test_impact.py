@@ -1,4 +1,4 @@
-"""测试 bin/agents impact。"""
+"""测试 bin/agentrace impact。"""
 
 
 def test_impact_finds_symbol_callers(tmp_path, run_agents):

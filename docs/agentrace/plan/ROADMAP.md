@@ -1,6 +1,6 @@
-# multiagent 路线图
+# agentrace 路线图
 
-本季度目标：把 multiagent 协议 v0.1 从设计稿变成可运行的模板。
+本季度目标：把 agentrace v0.1 从设计稿变成可运行的模板。
 
 ## 已完成
 
@@ -10,13 +10,13 @@
 
 ## 进行中
 
-- [ ] bin/agents CLI 实现
+- [ ] bin/agentrace CLI 实现
 - [ ] examples/calculator 完整数据
 - [ ] 适配器片段 + install-snippet
 
 ## 计划中
 
-- [ ] 自检：bin/agents check --strict 全通过
+- [ ] 自检：bin/agentrace check --strict 全通过
 - [ ] 发布到 PyPI（可选）
 
 ## 阻塞
@@ -31,4 +31,4 @@
 
 ---
 
-> 更新方式：完成 Story 后跑 `bin/agents sync`，本文件手动维护季度目标。
+> 更新方式：完成 Story 后跑 `bin/agentrace sync`，本文件手动维护季度目标。

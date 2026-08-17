@@ -8,12 +8,20 @@ created: 2026-08-10
 updated: 2026-08-12
 depends_on: []
 blocks: []
-related_reviews: [R-001]
-related_commits: ["a1b2c3d", "e4f5g6h"]
-impacted_symbols: [add, sub, mul, div]
-tags: [core]
+related_reviews:
+- R-001
+related_commits:
+- 3460abc
+- 39d5817
+impacted_symbols:
+- add
+- sub
+- mul
+- div
+tags:
+- core
 priority: P1
-blocked_by: ""
+blocked_by: ''
 ---
 
 ## 背景

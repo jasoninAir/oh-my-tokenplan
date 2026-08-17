@@ -11,11 +11,11 @@
    - 标记必须含版本号，便于未来升级替换
    - 触发条件写清楚（"进入项目前先 ls <触发文件>"）
 
-3. **改 `bin/agents install-snippet` 加一段 case**：新 Agent 的用户级配置文件路径
+3. **改 `bin/agentrace install-snippet` 加一段 case**：新 Agent 的用户级配置文件路径
 
 4. **改仓库根 README 加一行**："支持 <新 Agent>"，链接到对应适配器文件
 
-5. **改 `bin/agents check`**：增加对新适配器文件的"反向引用 AGENTS.md"校验
+5. **改 `bin/agentrace check`**：增加对新适配器文件的"反向引用 AGENTS.md"校验
 
 ## 模板
 
@@ -26,18 +26,18 @@
 
 <!-- 主约定在 ./AGENTS.md，先读它。 -->
 
-本项目遵循 multiagent 协议 v0.1。
+本项目遵循 agentrace v0.1。
 
 ## 工作流（接入 30 秒）
 
 1. Read `AGENTS.md`
-2. Read `docs/agents/stories/` 中 `status: in_progress` 的 Story
-3. `bin/agents check` 一次确保环境干净
+2. Read `docs/agentrace/stories/` 中 `status: in_progress` 的 Story
+3. `bin/agentrace check` 一次确保环境干净
 4. 干活，commit message 含 `(S-NNN)`
 
 ## Reviewer 边界
 
-- 只写 `docs/agents/reviews/`、`inbox/`、`decisions/`
+- 只写 `docs/agentrace/reviews/`、`inbox/`、`decisions/`
 - 不改 `src/`、不改 `status:` 字段
 
 ## <Agent> 风味

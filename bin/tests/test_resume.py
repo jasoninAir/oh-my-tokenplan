@@ -1,4 +1,4 @@
-"""测试 bin/agents resume / triage。"""
+"""测试 bin/agentrace resume / triage。"""
 import subprocess
 
 

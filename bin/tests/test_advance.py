@@ -1,4 +1,4 @@
-"""测试 bin/agents advance（核心状态机）。"""
+"""测试 bin/agentrace advance（核心状态机）。"""
 import subprocess
 
 
@@ -7,7 +7,7 @@ def test_advance_draft_to_planned(sample_project, run_agents):
     run_agents(sample_project, "new-story", "--title", "draft test")
     result = run_agents(sample_project, "advance", "S-002", "planned")
     assert result.returncode == 0, result.stderr
-    content = (sample_project / "docs/agents/stories/S-002-draft-test.md").read_text()
+    content = (sample_project / "docs/agentrace/stories/S-002-draft-test.md").read_text()
     assert "status: planned" in content
 
 
@@ -20,7 +20,7 @@ def test_advance_requires_assignee(sample_project, run_agents):
 
 def test_advance_planned_to_in_progress(sample_project, run_agents):
     """填 assignee 后 planned → in_progress 应成功。"""
-    story = sample_project / "docs/agents/stories/S-001-test.md"
+    story = sample_project / "docs/agentrace/stories/S-001-test.md"
     content = story.read_text()
     content = content.replace('assignee: ""', 'assignee: "claude-impl-A"')
     story.write_text(content)

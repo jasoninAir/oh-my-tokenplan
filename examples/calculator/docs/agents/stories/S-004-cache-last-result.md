@@ -3,17 +3,20 @@ id: S-004
 title: Calculator 加缓存，记住上次运算
 status: blocked
 author: claude-impl-A
-assignee: ""
+assignee: ''
 created: 2026-08-14
 updated: 2026-08-15
-depends_on: [S-001]
+depends_on:
+- S-001
 blocks: []
 related_reviews: []
 related_commits: []
 impacted_symbols: []
-tags: [perf, caching]
+tags:
+- perf
+- caching
 priority: P3
-blocked_by: "需 D-002 决策：缓存失效策略（LRU vs TTL vs 永不过期）"
+blocked_by: 需 D-002 决策：缓存失效策略（LRU vs TTL vs 永不过期）
 ---
 
 ## 背景

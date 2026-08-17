@@ -6,18 +6,18 @@
 
 <!-- 主约定在 ../../AGENTS.md，先读它。 -->
 
-本项目遵循 multiagent 协议 v0.1。
+本项目遵循 agentrace v0.1。
 
 ## 工作流（接入 30 秒）
 
-1. 跑 `bin/agents resume`（如有中断现场）或直接 Read `AGENTS.md`
-2. Read `docs/agents/stories/` 中 `status: in_progress` 的 Story
-3. `bin/agents check` 一次确保环境干净
+1. 跑 `bin/agentrace resume`（如有中断现场）或直接 Read `AGENTS.md`
+2. Read `docs/agentrace/stories/` 中 `status: in_progress` 的 Story
+3. `bin/agentrace check` 一次确保环境干净
 4. 干活，commit message 含 `(S-NNN)`
 
 ## Reviewer 边界
 
-- 只写 `docs/agents/reviews/`、`inbox/`、`decisions/`
+- 只写 `docs/agentrace/reviews/`、`inbox/`、`decisions/`
 - 不改 `src/`、不改 `status:` 字段
 
 ## Cursor 风味

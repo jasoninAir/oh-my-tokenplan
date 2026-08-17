@@ -21,8 +21,8 @@ draft → planned → in_progress → in_review → done
 | any → blocked | 任何人 | `blocked_by:` 非空 |
 | blocked → 原状态 | 解除者 | 删 `blocked_by:` |
 
-唯一改 `status:` 的方式：`bin/agents advance <id> <new>`。
-手改会被 `bin/agents check` 报错。
+唯一改 `status:` 的方式：`bin/agentrace advance <id> <new>`。
+手改会被 `bin/agentrace check` 报错。
 
 ## 阻塞与解锁
 
@@ -44,7 +44,7 @@ blocked 状态必须有：
                   @antigravity 请 review
 ```
 
-`bin/agents advance` 自动追加，手写无效。
+`bin/agentrace advance` 自动追加，手写无效。
 
 ## 工作流示例
 
@@ -52,13 +52,13 @@ blocked 状态必须有：
 
 ```bash
 # 1. 接手
-bin/agents advance S-001 in_progress   # status: planned → in_progress
+bin/agentrace advance S-001 in_progress   # status: planned → in_progress
 
 # 2. 写代码
 git commit -m "feat: implement basic arithmetic (S-001)"
 
 # 3. 提交 review
-bin/agents advance S-001 in_review    # status: in_progress → in_review
+bin/agentrace advance S-001 in_review    # status: in_progress → in_review
                                        # 自动写 changelog，列 commits
 ```
 
@@ -66,8 +66,8 @@ bin/agents advance S-001 in_review    # status: in_progress → in_review
 
 ```bash
 # 1. 写 review
-# 创建 docs/agents/reviews/R-001-on-S-001.md，verdict: approved
+# 创建 docs/agentrace/reviews/R-001-on-S-001.md，verdict: approved
 
 # 2. Agent A 据此 advance 到 done
-bin/agents advance S-001 done         # 自动校验有关联 approved review
+bin/agentrace advance S-001 done         # 自动校验有关联 approved review
 ```

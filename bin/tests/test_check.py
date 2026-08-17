@@ -1,4 +1,4 @@
-"""测试 bin/agents check（校验全集）。"""
+"""测试 bin/agentrace check（校验全集）。"""
 
 
 def test_check_on_valid_project_passes(sample_project, run_agents):
@@ -9,7 +9,7 @@ def test_check_on_valid_project_passes(sample_project, run_agents):
 
 def test_check_missing_required_field_fails(tmp_path, run_agents):
     """缺必填字段时 check 应报错。"""
-    stories_dir = tmp_path / "docs/agents/stories"
+    stories_dir = tmp_path / "docs/agentrace/stories"
     stories_dir.mkdir(parents=True)
     (stories_dir / "_TEMPLATE.md").write_text("---\nid: S-NNN\n---\n")
     bad = stories_dir / "S-001-bad.md"
@@ -21,7 +21,7 @@ def test_check_missing_required_field_fails(tmp_path, run_agents):
 
 def test_check_unique_ids(tmp_path, run_agents):
     """重复 S-001 应报错。"""
-    stories_dir = tmp_path / "docs/agents/stories"
+    stories_dir = tmp_path / "docs/agentrace/stories"
     stories_dir.mkdir(parents=True)
     (stories_dir / "_TEMPLATE.md").write_text("---\nid: S-NNN\n---\n")
     body = (

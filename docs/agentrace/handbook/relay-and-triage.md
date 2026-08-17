@@ -9,8 +9,8 @@
 接手项目的 Agent 上线第一步：
 
 ```bash
-bin/agents resume
-# 或 bin/agents triage
+bin/agentrace resume
+# 或 bin/agentrace triage
 ```
 
 该命令自动执行以下分析并输出 20 行极简简报：
@@ -20,12 +20,12 @@ bin/agents resume
 3. **单测探针探测**：静默运行关联单测，抓取当前的 Failure / Error 堆栈。
 4. **生成行动建议**：明确下一步最小可执行动作，避免盲读海量文件消耗 Token。
 
-## 3. 代码影响面分析（`bin/agents impact`）
+## 3. 代码影响面分析（`bin/agentrace impact`）
 
 在修改核心公共接口或提交 Review 前，运行：
 
 ```bash
-bin/agents impact [file_or_symbol]
+bin/agentrace impact [file_or_symbol]
 ```
 
 CLI 将结合 AST / CodeGraph 输出影响拓扑，帮助 Agent 和 Reviewer 精准掌握变更波及范围。

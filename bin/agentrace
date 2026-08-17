@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""bin/agents: multiagent 协议 CLI。
+"""bin/agentrace: agentrace protocol CLI。
 
 命令:
 - init: 初始化模板
@@ -65,7 +65,7 @@ def _slugify(title: str) -> str:
 # ============ init ============
 
 INIT_TEMPLATES: dict[str, str] = {
-    "docs/agents/stories/_TEMPLATE.md": """---
+    "docs/agentrace/stories/_TEMPLATE.md": """---
 id: S-NNN
 title: <title>
 status: draft
@@ -97,7 +97,7 @@ blocked_by: ""
 
 - __TODAY__  status: draft
 """,
-    "docs/agents/reviews/_TEMPLATE.md": """---
+    "docs/agentrace/reviews/_TEMPLATE.md": """---
 id: R-NNN
 story: S-MMM
 reviewer: __USER__
@@ -122,12 +122,12 @@ addresses_reviews: []
 
 ## 当前激活 Story
 
-<!-- bin/agents sync -->
+<!-- bin/agentrace sync -->
 
 ## 工作流
 
-1. bin/agents new-story --title "..."
-2. bin/agents advance S-NNN in_progress
+1. bin/agentrace new-story --title "..."
+2. bin/agentrace advance S-NNN in_progress
 """,
 }
 
@@ -148,17 +148,17 @@ def cmd_init(args):
         content = content.replace("__USER__", user).replace("__TODAY__", today)
         target.write_text(content)
 
-    print(f"initialized: multiagent 协议模板在 {cwd}")
-    print('  下一步: bin/agents new-story --title "第一个 story"')
+    print(f"initialized: agentrace 协议模板在 {cwd}")
+    print('  下一步: bin/agentrace new-story --title "第一个 story"')
 
 
 # ============ new-story ============
 
 
 def cmd_new_story(args):
-    stories_dir = Path.cwd() / "docs/agents/stories"
+    stories_dir = Path.cwd() / "docs/agentrace/stories"
     if not stories_dir.exists():
-        print(f"error: {stories_dir} 不存在，请先 bin/agents init", file=sys.stderr)
+        print(f"error: {stories_dir} 不存在，请先 bin/agentrace init", file=sys.stderr)
         sys.exit(1)
 
     template = stories_dir / "_TEMPLATE.md"
@@ -187,8 +187,8 @@ def cmd_new_story(args):
 
 def cmd_new_review(args):
     story_id = args.story_id
-    stories_dir = Path.cwd() / "docs/agents/stories"
-    reviews_dir = Path.cwd() / "docs/agents/reviews"
+    stories_dir = Path.cwd() / "docs/agentrace/stories"
+    reviews_dir = Path.cwd() / "docs/agentrace/reviews"
 
     matches = list(stories_dir.glob(f"{story_id}-*.md"))
     if not (stories_dir / f"{story_id}.md").exists() and not matches:
@@ -237,7 +237,7 @@ def cmd_advance(args):
     story_id = args.story_id
     new_status = args.new_status
 
-    stories_dir = Path.cwd() / "docs/agents/stories"
+    stories_dir = Path.cwd() / "docs/agentrace/stories"
     matches = list(stories_dir.glob(f"{story_id}-*.md"))
     if not matches:
         print(f"error: story {story_id} not found", file=sys.stderr)
@@ -278,10 +278,10 @@ SYMBOLS_CACHE = ".agents/symbols-cache.yaml"
 def cmd_sync(args):
     cwd = Path.cwd()
     agents_md = cwd / "AGENTS.md"
-    stories_dir = cwd / "docs/agents/stories"
+    stories_dir = cwd / "docs/agentrace/stories"
 
     if not stories_dir.exists():
-        print("error: docs/agents/stories/ 不存在", file=sys.stderr)
+        print("error: docs/agentrace/stories/ 不存在", file=sys.stderr)
         sys.exit(1)
 
     cache_path = cwd / SYMBOLS_CACHE
@@ -314,14 +314,14 @@ def cmd_sync(args):
 
     if agents_md.exists():
         text = agents_md.read_text()
-        marker = "<!-- bin/agents sync -->"
+        marker = "<!-- bin/agentrace sync -->"
         if marker in text:
             before, _, after = text.partition(marker)
             new_text = before + marker + "\n\n" + table + "\n" + after
             agents_md.write_text(new_text)
             print(f"synced: AGENTS.md updated with {len(stories)} stories")
         else:
-            print("warning: AGENTS.md 缺少 <!-- bin/agents sync --> 标记", file=sys.stderr)
+            print("warning: AGENTS.md 缺少 <!-- bin/agentrace sync --> 标记", file=sys.stderr)
     else:
         print("warning: AGENTS.md 不存在，跳过同步", file=sys.stderr)
 
@@ -335,8 +335,8 @@ def cmd_check(args):
     strict = args.strict
 
     cwd = Path.cwd()
-    stories_dir = cwd / "docs/agents/stories"
-    reviews_dir = cwd / "docs/agents/reviews"
+    stories_dir = cwd / "docs/agentrace/stories"
+    reviews_dir = cwd / "docs/agentrace/reviews"
 
     story_files = sorted(stories_dir.glob("S-*.md")) if stories_dir.exists() else []
     story_ids: set[str] = set()
@@ -361,7 +361,7 @@ def cmd_check(args):
                 cwd=cwd, capture_output=True, text=True, check=False,
             ).stdout.strip()
             if dirty and fm.get("status") == "in_progress":
-                warnings.append(f"{sf.name}: 接力提示 - 存在 dirty 工作区，可考虑 bin/agents resume")
+                warnings.append(f"{sf.name}: 接力提示 - 存在 dirty 工作区，可考虑 bin/agentrace resume")
         except Exception:
             pass
 
@@ -416,10 +416,10 @@ def cmd_check(args):
 
 def cmd_render(args):
     cwd = Path.cwd()
-    stories_dir = cwd / "docs/agents/stories"
+    stories_dir = cwd / "docs/agentrace/stories"
 
     if not stories_dir.exists():
-        print("error: docs/agents/stories/ 不存在", file=sys.stderr)
+        print("error: docs/agentrace/stories/ 不存在", file=sys.stderr)
         sys.exit(1)
 
     by_status: dict[str, list[dict]] = {}
@@ -431,7 +431,7 @@ def cmd_render(args):
     lines = [
         "# 项目进度概览",
         "",
-        f"_generated by bin/agents render at {datetime.datetime.now().isoformat()}_",
+        f"_generated by bin/agentrace render at {datetime.datetime.now().isoformat()}_",
         "",
     ]
     status_order = ["in_progress", "in_review", "blocked", "planned", "draft", "done", "rejected"]
@@ -444,7 +444,7 @@ def cmd_render(args):
             lines.append(f"- **{s.get('id', '?')}** {s.get('title', '')} (assignee: {s.get('assignee', '—')})")
         lines.append("")
 
-    target = cwd / "docs/agents/OVERVIEW.md"
+    target = cwd / "docs/agentrace/OVERVIEW.md"
     target.write_text("\n".join(lines))
     print(f"rendered: {target.relative_to(cwd)}")
 
@@ -484,7 +484,7 @@ def cmd_install_snippet(args):
         existing = target_path.read_text() if target_path.exists() else ""
 
         pattern = re.compile(
-            r"<!-- BEGIN multiagent-protocol v[\d.]+.*?-->.*?<!-- END multiagent-protocol v[\d.]+.*?-->",
+            r"<!-- BEGIN agentrace-protocol v[\d.]+.*?-->.*?<!-- END agentrace-protocol v[\d.]+.*?-->",
             re.DOTALL,
         )
         if pattern.search(existing):
@@ -548,7 +548,7 @@ def cmd_resume(args):
     print("==================== 现场接力简报 (Auto-Triaged) ====================")
 
     # 1. 当前激活 Story
-    stories_dir = cwd / "docs/agents/stories"
+    stories_dir = cwd / "docs/agentrace/stories"
     active_story = "无"
     if stories_dir.exists():
         for sf in stories_dir.glob("S-*.md"):
@@ -644,13 +644,80 @@ def cmd_impact(args):
 # ============ entry ============
 
 
+def cmd_install(args):
+    """Install the agentrace skill + user-level snippet globally."""
+    import shutil
+    import os
+
+    cwd = Path.cwd()
+    skill_src = cwd / ".claude/skills/agentrace"
+    snippet_src = cwd / "adapters/snippets/claude.md"
+
+    if not skill_src.exists():
+        print(f"error: {skill_src} 不存在，无法安装", file=sys.stderr)
+        sys.exit(1)
+
+    home = Path(os.environ.get("HOME", str(Path.home())))
+    skill_dst = home / ".claude/skills/agentrace"
+
+    if skill_dst.exists():
+        shutil.rmtree(skill_dst)
+    shutil.copytree(skill_src, skill_dst)
+    print(f"installed: skill copied to {skill_dst}")
+
+    if snippet_src.exists():
+        class _A: pass
+        a = _A()
+        a.agent = "claude"
+        cmd_install_snippet(a)
+    else:
+        print(f"warning: {snippet_src} 不存在，跳过 snippet 安装", file=sys.stderr)
+
+    print("")
+    print("agentrace 已全局安装。下一步:")
+    print("  - 在 Claude Code 里直接说 'review S-001' / 'start a story' 等触发 skill")
+    print("  - 在新项目里跑 `agentrace init` 创建项目级协议")
+
+
+def cmd_uninstall(args):
+    """Remove globally installed agentrace skill + user-level snippet."""
+    import os
+    import re
+
+    home = Path(os.environ.get("HOME", str(Path.home())))
+    skill_dst = home / ".claude/skills/agentrace"
+    claude_md = home / ".claude/CLAUDE.md"
+
+    if skill_dst.exists():
+        import shutil
+        shutil.rmtree(skill_dst)
+        print(f"removed: {skill_dst}")
+    else:
+        print("info: skill 未安装，跳过")
+
+    if claude_md.exists():
+        text = claude_md.read_text()
+        pattern = re.compile(
+            r"\n*<!-- BEGIN agentrace protocol v[\d.]+.*?-->.*?<!-- END agentrace protocol v[\d.]+.*?-->\n*",
+            re.DOTALL,
+        )
+        new_text = pattern.sub("\n", text, count=1)
+        if new_text != text:
+            claude_md.write_text(new_text)
+            print(f"cleaned: agentrace snippet removed from {claude_md}")
+        else:
+            print("info: CLAUDE.md 中未发现 agentrace snippet")
+
+
 def main():
-    parser = argparse.ArgumentParser(prog="agents", description="multiagent 协议 CLI")
+    parser = argparse.ArgumentParser(prog="agentrace", description="agentrace 协议 CLI")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     subparsers.add_parser("init")
-    p_install = subparsers.add_parser("install-snippet")
-    p_install.add_argument("--agent", default=None)
+    subparsers.add_parser("install")
+    subparsers.add_parser("uninstall")
+    p_install_snippet = subparsers.add_parser("install-snippet")
+    p_install_snippet.add_argument("--agent", default=None)
 
     p_new_story = subparsers.add_parser("new-story")
     p_new_story.add_argument("--title", default="")
@@ -678,6 +745,8 @@ def main():
 
     handlers = {
         "init": cmd_init,
+        "install": cmd_install,
+        "uninstall": cmd_uninstall,
         "install-snippet": cmd_install_snippet,
         "new-story": cmd_new_story,
         "new-review": cmd_new_review,

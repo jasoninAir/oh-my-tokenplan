@@ -33,5 +33,5 @@ markdown 文件需要存元数据（id、status、created 等）。
 ## 影响
 
 - 所有 .md 文件必有 frontmatter
-- `bin/agents check` 校验必填字段
+- `bin/agentrace check` 校验必填字段
 - 文件名 slug 仅作可读性，元数据以 frontmatter 为准

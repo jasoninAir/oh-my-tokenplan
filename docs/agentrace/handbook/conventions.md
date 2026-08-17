@@ -7,7 +7,7 @@
 - Decision: `D-NNN`
 - Inbox: `I-NNN`（可选，也可不用 ID）
 
-ID 由 `bin/agents new-*` 自动分配，禁止手写。
+ID 由 `bin/agentrace new-*` 自动分配，禁止手写。
 
 ## 文件名
 
@@ -29,7 +29,7 @@ slug 不必与 title 完全一致，但要能识别主题。
 - 必含一个 Story ID
 - 多 Story 关联：`feat: x (S-001, S-003)`
 
-`bin/agents sync` 从 git log 提取并更新 `Story.related_commits`。
+`bin/agentrace sync` 从 git log 提取并更新 `Story.related_commits`。
 
 ## 章节约定
 
