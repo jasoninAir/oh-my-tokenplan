@@ -15,13 +15,13 @@
 
 ## The Problem
 
-You use Claude Code for an hour, hit your 5-hour quota, switch to Antigravity, and start explaining the project from scratch. The new agent reads your codebase, asks 20 questions, gets half of them wrong, and you're back to square one.
+You use Claude Code for an hour, hit your 5-hour quota, switch to Antigravity (Gemini), Cursor, Codex, or Kimi Code, and start explaining the project from scratch. The new agent reads your codebase, asks 20 questions, gets half of them wrong, and you're back to square one.
 
 Or: Agent A writes a feature, you want Agent B to review it, but neither tool has a clean handoff format.
 
 Or: You're on a long-running project. Different days, different agents, different sessions. Nobody remembers what happened yesterday.
 
-**agentrace solves this by turning multi-agent development into a file-system problem.**
+**agentrace solves this by turning multi-agent development into a neutral, file-system problem.**
 
 ## What It Does
 
@@ -35,6 +35,8 @@ Or: You're on a long-running project. Different days, different agents, differen
 | State-machine bugs | `bin/agentrace check --strict` validates frontmatter, transitions, references |
 
 ## 30-Second Demo
+
+> *Note: This walkthrough uses "Claude Code (Author) + Antigravity (Reviewer)" as a concrete reference scenario. You can combine any agents (e.g. Codex, Kimi Code, Cursor, Windsurf, Aider).*
 
 ```bash
 # Install once (Claude Code Skill + user-level snippet)
@@ -78,7 +80,7 @@ agentrace advance S-001 done
 ## How It Works
 
 ```
-                user-level snippet (~/.claude/CLAUDE.md)
+                user-level snippet (~/.claude/CLAUDE.md / Antigravity rules / agent configs)
                   ↓ "AGENTS.md present? Then follow agentrace"
                 ┌────────────────────────────┐
                 │ project-level (AGENTS.md)  │
@@ -197,16 +199,32 @@ cd examples/calculator
 4. **Reviews are append-only.** Old reviews stay as audit trail; never deleted.
 5. **All `.md` files must have YAML frontmatter.** Missing fields fail `agentrace check --strict`.
 
-## Supported Agents
+## Adapters & Supported Agents Ecosystem
 
-| Agent | Adapter file | Status |
-|-------|--------------|--------|
-| Claude Code | `CLAUDE.md` | Stable |
-| Antigravity / Gemini | `GEMINI.md` | Stable |
-| Cursor | `adapters/examples/cursor.md` | Example template |
-| Any other | See `adapters/README.md` | Add your own |
+> **Protocol Neutrality**: agentrace is a tool-agnostic, file-based protocol. While **Claude Code** and **Antigravity** serve as the initial reference implementations in our docs and examples, the protocol is designed to work with **any AI coding assistant** capable of reading files and executing shell commands.
 
-To add a new agent, write one `<NAME>.md` (≤ 25 lines, mirroring CLAUDE.md), one user-level snippet, and register it in `bin/agentrace install`.
+### Support Matrix
+
+| Agent / Coding Assistant | Adapter File | User-level Snippet | Status | Notes |
+|-------------------------|--------------|-------------------|--------|-------|
+| **Claude Code** | `CLAUDE.md` | `adapters/snippets/claude.md` | Reference (Stable) | Skill + Snippet automated install |
+| **Antigravity (Gemini)** | `GEMINI.md` | `adapters/snippets/antigravity.md` | Reference (Stable) | Rules + Snippet automated install |
+| **Kimi Code** | `adapters/examples/kimi.md` | Co-creation | Template ready | Global snippet contribution welcome |
+| **Codex / OpenAI** | `adapters/examples/codex.md` | Co-creation | Template ready | Global instructions contribution welcome |
+| **Cursor** | `adapters/examples/cursor.md` | Co-creation | Template ready | `.cursorrules` integration welcome |
+| **Windsurf / Cascade** | Co-creation | Co-creation | PRs welcome | Welcome community PR |
+| **Aider / Devin / Others** | See adapter guide | See adapter guide | Open | 5-minute setup |
+
+### How to Add an Adapter for Your Favorite Agent
+
+agentrace uses a two-layer architecture (**user-level global snippet + project-level thin adapter**). Adding a new agent takes only a few minutes:
+
+1. **Create thin adapter**: Write `<NAME>.md` (e.g. `adapters/examples/<name>.md`) with line 1 referencing `AGENTS.md`.
+2. **Write user snippet**: Write `adapters/snippets/<name>.md` with versioned markers.
+3. **Register path**: Add the config path to `cmd_install_snippet` in `bin/agentrace`.
+4. **Open a PR**: Submit your adapter to expand the ecosystem!
+
+See the full walkthrough in [Adapters Guide (adapters/README.md)](adapters/README.md).
 
 ## Design Philosophy
 
@@ -221,12 +239,18 @@ To add a new agent, write one `<NAME>.md` (≤ 25 lines, mirroring CLAUDE.md), o
 
 - [ ] v0.2: True AST call-graph analysis (currently v0.1 uses text grep + `ast.FunctionDef`)
 - [ ] v0.3: PyPI distribution (`pip install agentrace`)
-- [ ] v0.4: VS Code extension auto-detecting AGENTS.md
+- [ ] v0.4: VS Code / Cursor extension auto-detecting AGENTS.md
+- [ ] v0.5: Expand official adapter matrix (built-in snippets for Kimi Code, Codex, Windsurf, Aider, etc.)
 - [ ] v1.0: Multi-language (Node.js, Rust, Go) demo projects
 
 ## Contributing
 
-Issues and PRs welcome. The protocol is intentionally minimal — features that require heavy external dependencies or new tooling are likely to be rejected. The bar is "would a 60-line Python library demo (`examples/calculator`) make sense with this change?"
+Issues and PRs welcome! We especially welcome contributions in:
+- 🛠️ **New Agent Adapters**: Port agentrace to Codex, Kimi Code, Windsurf, Aider, etc. (see [adapters/README.md](adapters/README.md))
+- 📐 **Diverse Examples**: Multi-agent workflows across different languages and stacks
+- 🔍 **Core Tooling**: AST analysis improvements, state-machine validators
+
+The protocol is intentionally minimal — features that require heavy external dependencies or new tooling are likely to be rejected. The bar is "would a 60-line Python library demo (`examples/calculator`) make sense with this change?"
 
 ## License
 

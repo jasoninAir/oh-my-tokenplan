@@ -15,13 +15,13 @@
 
 ## 核心痛点
 
-你在日常编码中使用 Claude Code，工作了一小时突然触发 5 小时配额墙，不得不切换到 Antigravity（Gemini）或 Cursor。此时你不得不从头开始向新 Agent 解释项目背景与当前进度。新 Agent 重新阅读整个代码库，反复提问，甚至理解偏差，让你瞬间回到原点。
+你在日常编码中使用 Claude Code，工作了一小时突然触发 5 小时配额墙，不得不切换到 Antigravity（Gemini）、Cursor、Codex 或 Kimi Code。此时你不得不从头开始向新 Agent 解释项目背景与当前进度。新 Agent 重新阅读整个代码库，反复提问，甚至理解偏差，让你瞬间回到原点。
 
 或者：Agent A 编写了一项功能，你想让 Agent B 进行审查（Code Review），但两个工具之间缺乏清晰的审查交接协议。
 
 或者：面对长期维护的大型项目，不同的日子使用不同的 Agent 与会话，没有任何人记得昨天的上下文与决策细节。
 
-**agentrace 的解决方案：将多 Agent 协同与接力问题，转化为统一规范的文件系统（File-based）问题。**
+**agentrace 的解决方案：将多 Agent 协同与接力问题，转化为中立、统一规范的文件系统（File-based）问题。**
 
 ## 核心功能
 
@@ -36,6 +36,8 @@
 | 接入已有项目 | `bin/agentrace onboard` → 自动扫描项目结构并生成初始化落地规划 |
 
 ## 30 秒极速演示
+
+> *提示：以下演示以「Claude Code 编写 + Antigravity 审查」作为典型场景，实际可灵活组合 Codex、Kimi Code、Cursor、Windsurf、Aider 等任意 Agent。*
 
 ```bash
 # 全局安装一次（注册 Claude Code Skill 与用户级配置片段）
@@ -79,7 +81,7 @@ agentrace advance S-001 done
 ## 运作机制
 
 ```
-                用户级配置片段 (~/.claude/CLAUDE.md / Antigravity 规则)
+                用户级配置片段 (~/.claude/CLAUDE.md / Antigravity 规则 / 各 Agent 配置)
                   ↓ "检测到 AGENTS.md？遵循 agentrace 协议"
                 ┌────────────────────────────┐
                 │ 项目级主入口 (AGENTS.md)    │
@@ -199,16 +201,32 @@ cd examples/calculator
 4. **审查记录只增不删（Append-only）**：所有历史审查均作为可追溯的审计轨迹保留，禁止直接覆盖或删除。
 5. **所有 `.md` 必须具备合规的 YAML Frontmatter**：字段缺失或非法将无法通过 `agentrace check --strict`。
 
-## 已支持的 Agent
+## 适配层生态与多 Agent 支持
 
-| Agent | 适配器文件 | 状态 |
-|-------|------------|------|
-| Claude Code | `CLAUDE.md` | 稳定支持 |
-| Antigravity / Gemini | `GEMINI.md` | 稳定支持 |
-| Cursor | `adapters/examples/cursor.md` | 示例模板 |
-| 其他任何 Agent | 参见 `adapters/README.md` | 支持自由扩展 |
+> **协议中立性声明**：agentrace 本身是一套中立的、文件驱动（File-based）的多 Agent 协同标准。当前文档与代码中主要以 **Claude Code** 与 **Antigravity** 为先行落地参考实现（Reference Implementations），但协议**完全适用于任何具备文件读写与命令执行能力的 AI 编程工具**。
 
-新增一个 Agent 仅需编写一个 `<NAME>.md`（≤ 25 行，参照 `CLAUDE.md`），准备对应的用户级 Prompt 片段，并在 `bin/agentrace install` 中注册即可。
+### 支持矩阵
+
+| Agent / 编程助手 | 适配器文件 | 用户级全局片段 | 适配状态 | 说明 |
+|-----------------|-----------|--------------|---------|------|
+| **Claude Code** | `CLAUDE.md` | `adapters/snippets/claude.md` | 官方先行范例（稳定） | 支持 Skill + Snippet 一键全局安装 |
+| **Antigravity (Gemini)** | `GEMINI.md` | `adapters/snippets/antigravity.md` | 官方先行范例（稳定） | 支持 Rules + Snippet 全局安装 |
+| **Kimi Code** | `adapters/examples/kimi.md` | 待共建 | 示例模板（开箱即用） | 欢迎补充用户级配置注入路径 |
+| **Codex / OpenAI** | `adapters/examples/codex.md` | 待共建 | 示例模板（开箱即用） | 欢迎补充 Instructions 模板 |
+| **Cursor** | `adapters/examples/cursor.md` | 待共建 | 示例模板（开箱即用） | 欢迎补充 `.cursorrules` 规则联动 |
+| **Windsurf / Cascade** | 待共建 | 待共建 | 欢迎贡献 | 欢迎提交 PR |
+| **Aider / Devin / 其他** | 参见适配指南 | 参见适配指南 | 开放接入 | 仅需 5 分钟即可完成适配 |
+
+### 如何扩展或贡献一个新 Agent 适配器？
+
+agentrace 采用“**用户级全局片段 + 项目级极薄跳板**”的双层架构，为新 Agent 添加适配极其轻量（通常不超过 25 行配置）：
+
+1. **创建项目级适配器**：在 `adapters/examples/<name>.md`（或项目根目录 `<NAME>.md`）编写跳板文件，第一行反向引用 `AGENTS.md`。
+2. **编写用户级片段**：在 `adapters/snippets/<name>.md` 编写带有版本标记的全局 Prompt 规则。
+3. **注册 CLI 路径**：在 `bin/agentrace` 的 `cmd_install_snippet` 中注册新 Agent 的全局配置路径。
+4. **提交 PR 完善生态**：欢迎向本仓库提交 Pull Request，让更多开发者受益！
+
+详细适配步骤与模板规范请见：[Agent 适配层指南 (adapters/README.md)](adapters/README.md)。
 
 ## 设计哲学
 
@@ -223,12 +241,18 @@ cd examples/calculator
 
 - [ ] v0.2: 真正的 AST 调用图深度分析（目前 v0.1 基于文本正则与 `ast.FunctionDef`）
 - [ ] v0.3: PyPI 官方包分发（支持 `pip install agentrace`）
-- [ ] v0.4: VS Code 扩展（自动感知并高亮 `AGENTS.md` 任务状态）
+- [ ] v0.4: VS Code / Cursor 扩展（自动感知并高亮 `AGENTS.md` 任务状态）
+- [ ] v0.5: 扩展官方适配矩阵（丰富 Kimi Code, Codex, Windsurf, Aider 等内置 Snippets）
 - [ ] v1.0: 多语言（Node.js / Rust / Go）开箱即用示例项目
 
 ## 参与贡献
 
-欢迎提交 Issue 和 Pull Request。本协议崇尚极简——凡是引入重度外部依赖或复杂工具链的提议将被谨慎评估。我们衡量的基准是：“这个改动能否在 60 行的演示库（`examples/calculator`）中保持简洁清晰？”
+热烈欢迎提交 Issue 和 Pull Request！我们尤其欢迎以下维度的贡献：
+- 🛠️ **新增 Agent 适配器**：为 Codex、Kimi Code、Windsurf、Aider 等工具贡献适配器与安装脚本（见 [adapters/README.md](adapters/README.md)）
+- 📐 **示例项目丰富**：提供不同技术栈或架构模式的多 Agent 接力案例
+- 🔍 **核心工具链优化**：AST 分析算法优化、状态机校验完善
+
+本协议崇尚极简——凡是引入重度外部依赖或复杂工具链的提议将被谨慎评估。我们衡量的基准是：“这个改动能否在 60 行的演示库（`examples/calculator`）中保持简洁清晰？”
 
 ## 开源协议
 

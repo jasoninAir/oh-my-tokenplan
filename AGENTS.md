@@ -1,7 +1,7 @@
 # AGENTS.md — agentrace模板
 
 > 本文件是 agentrace 模板的 single source of truth。
-> CLAUDE.md / GEMINI.md 只是适配器，所有约束都源自本文件。
+> CLAUDE.md / GEMINI.md 等各 Agent 适配器均为薄跳板，所有约束与规范都源自本文件。
 > 任何 Agent 接手 agentrace 派生项目：先 Read 本文件，再 Read 当前激活 Story。
 
 ## 项目简介
