@@ -13,5 +13,10 @@
 7. **跨 Agent 协作**：接手前 `Read` `docs/agentrace/inbox/`，可能有上一个 Agent 留的问题
 8. **下一步**：commit 后 `Read` `AGENTS.md` 中"当前激活 Story"表格，更新你的状态
 
-如果项目根目录**没有** `AGENTS.md`：按默认 Claude Code 流程工作，但 commit message 仍推荐带任务 ID（如有）。
+如果项目根目录**没有** `AGENTS.md` 但有 `README.md` / `package.json` / `pyproject.toml` 等项目标识：
+- **Onboarding 检测**：主动询问用户一次"这个项目还没接入 agentrace，是否要我帮你 onboarding？（自动扫代码 → 拆 Story → 填 AGENTS.md，全程不再询问）"
+- 用户同意后跑 `bin/agentrace onboard`，**不再征询任何细节**，全流程自动完成
+- 用户拒绝则啥也不做，下次进入再问
+
+如果项目根目录**没有**任何项目标识（空目录）：按默认 Claude Code 流程工作。
 <!-- END agentrace-protocol v0.1 -->

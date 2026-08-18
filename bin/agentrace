@@ -152,6 +152,181 @@ def cmd_init(args):
     print('  下一步: bin/agentrace new-story --title "第一个 story"')
 
 
+# ============ onboard ============
+
+ONBOARD_PLAN_PATH = ".agents/onboarding-plan.yaml"
+
+# 启发式扫描要排除的目录名
+_SKIP_DIRS = {
+    "node_modules", "__pycache__", ".git", ".pytest_cache",
+    "dist", "build", ".next", ".nuxt", "venv", ".venv", "env",
+    "target", ".cargo", ".idea", ".vscode",
+    "tests", "test", "__tests__", "docs", "doc",
+    "scripts", "bin", "examples", "example",
+}
+
+# 启发式扫描要看的源码根目录
+_SOURCE_ROOTS = ["src", "lib", "app", "pkg", "internal", "packages", "cmd"]
+
+
+def _detect_modules(cwd: Path) -> dict:
+    """启发式扫描项目根目录，返回候选模块列表 + 项目元数据。
+
+    输出 schema:
+    {
+      "project_type": "python" | "nodejs" | "rust" | "go" | "unknown",
+      "frameworks": [..],
+      "modules": [{"path": str, "file_count": int, "commit_count": int, "confidence": float}],
+    }
+    """
+    info: dict = {
+        "project_type": "unknown",
+        "frameworks": [],
+        "modules": [],
+        "detected_at": datetime.datetime.now().isoformat(),
+    }
+
+    # 1. 项目类型 + 框架
+    if (cwd / "pyproject.toml").exists() or (cwd / "setup.py").exists():
+        info["project_type"] = "python"
+        pyproject = cwd / "pyproject.toml"
+        if pyproject.exists():
+            text = pyproject.read_text(encoding="utf-8", errors="ignore")
+            for fw in ("fastapi", "django", "flask", "pydantic", "sqlalchemy", "pytest"):
+                if fw in text.lower():
+                    info["frameworks"].append(fw)
+    elif (cwd / "package.json").exists():
+        info["project_type"] = "nodejs"
+        try:
+            import json
+            pkg = json.loads((cwd / "package.json").read_text())
+            deps = {**pkg.get("dependencies", {}), **pkg.get("devDependencies", {})}
+            for fw in ("react", "vue", "next", "nuxt", "express", "fastify", "nestjs"):
+                if fw in deps:
+                    info["frameworks"].append(fw)
+        except Exception:
+            pass
+    elif (cwd / "Cargo.toml").exists():
+        info["project_type"] = "rust"
+    elif (cwd / "go.mod").exists():
+        info["project_type"] = "go"
+
+    # 2. 扫源码根目录的子目录
+    candidates: dict[str, dict] = {}
+    for root_name in _SOURCE_ROOTS:
+        root = cwd / root_name
+        if not root.is_dir():
+            continue
+        for child in sorted(root.iterdir()):
+            if not child.is_dir() or child.name in _SKIP_DIRS or child.name.startswith("."):
+                continue
+            # 排除嵌套的源码根（如 src/server/api）
+            if any((child / sr).is_dir() for sr in _SOURCE_ROOTS):
+                continue
+            rel = str(child.relative_to(cwd))
+            py_files = list(child.rglob("*.py"))
+            js_files = list(child.rglob("*.js")) + list(child.rglob("*.ts")) + list(child.rglob("*.tsx"))
+            rs_files = list(child.rglob("*.rs"))
+            go_files = list(child.rglob("*.go"))
+            file_count = len(py_files) + len(js_files) + len(rs_files) + len(go_files)
+            if file_count == 0:
+                continue
+            candidates[rel] = {
+                "path": rel,
+                "file_count": file_count,
+                "commit_count": 0,
+                "confidence": 0.5,  # 目录基础分
+            }
+
+    # 3. git log 统计每个目录的 commit 频率（最近 200 条）
+    try:
+        log_out = subprocess.run(
+            ["git", "log", "--name-only", "--pretty=format:", "-n", "200"],
+            cwd=cwd, capture_output=True, text=True, check=False,
+        ).stdout
+        if log_out.strip():
+            for line in log_out.split("\n"):
+                line = line.strip()
+                if not line:
+                    continue
+                # 找到最长匹配的 candidate prefix
+                best = None
+                for rel in candidates:
+                    if line.startswith(rel + "/") or line == rel:
+                        if best is None or len(rel) > len(best):
+                            best = rel
+                if best:
+                    candidates[best]["commit_count"] += 1
+    except Exception:
+        pass
+
+    # 4. confidence 调整：commit 越多越有信心
+    for c in candidates.values():
+        commits = c["commit_count"]
+        files = c["file_count"]
+        if commits > 50 and files > 10:
+            c["confidence"] = 0.95
+        elif commits > 10 and files > 5:
+            c["confidence"] = 0.85
+        elif commits > 0 and files > 0:
+            c["confidence"] = 0.7
+        else:
+            c["confidence"] = 0.5
+
+    # 按 confidence 排序
+    info["modules"] = sorted(candidates.values(), key=lambda m: (-m["confidence"], -m["file_count"]))
+    return info
+
+
+def cmd_onboard(args):
+    """半自动 onboarding：
+    - 跑 init（创建 AGENTS.md + 模板）
+    - 跑启发式扫模块
+    - 把结果写到 .agents/onboarding-plan.yaml
+    - 输出给 agent 的 instruction，告诉它如何用 LLM 细化并完成 onboarding
+    """
+    cwd = Path.cwd()
+
+    # 1. 检查已有 AGENTS.md
+    if (cwd / "AGENTS.md").exists():
+        print("info: AGENTS.md 已存在，跳过 init（用 `bin/agentrace init --force` 强制）")
+    else:
+        cmd_init(argparse.Namespace())
+
+    # 2. 启发式扫描
+    info = _detect_modules(cwd)
+
+    # 3. 写 plan
+    plan_path = cwd / ONBOARD_PLAN_PATH
+    plan_path.parent.mkdir(parents=True, exist_ok=True)
+    plan_path.write_text(yaml.safe_dump(info, allow_unicode=True, sort_keys=False))
+    print(f"plan written: {ONBOARD_PLAN_PATH}")
+
+    # 4. 输出给 agent 的 instruction
+    print("")
+    print("================== agentrace onboarding 指令 ==================")
+    print(f"项目类型: {info['project_type']} | 框架: {', '.join(info['frameworks']) or '未识别'}")
+    print(f"启发式识别到 {len(info['modules'])} 个候选模块:")
+    for m in info["modules"]:
+        print(f"  - {m['path']:30s}  files={m['file_count']:3d}  commits={m['commit_count']:3d}  conf={m['confidence']:.2f}")
+    print("")
+    print("→ Agent（你）接下来要做的事：")
+    print("1. Read README.md / pyproject.toml / package.json 等理解项目")
+    print("2. 对每个 candidate 模块，结合路径 + commit 频率，推断真实标题")
+    print("   例: src/auth → '用户认证'; src/articles → '文章 CRUD'")
+    print("3. 推断初始 status:")
+    print("   - 过去 7 天有 commit → in_progress")
+    print("   - 从未 commit → planned")
+    print("   - 旧且不再活跃 → done")
+    print("4. 为每个 Story 跑: bin/agentrace new-story --title \"<真实标题>\"")
+    print("5. 手动把生成的 S-NNN 改 frontmatter: status / assignee / 范围")
+    print("6. 跑 bin/agentrace sync 刷新 AGENTS.md 表格")
+    print("7. 删除 .agents/onboarding-plan.yaml（临时文件）")
+    print("")
+    print("注意：onboarding 不向用户征询细节，全自动跑完。")
+    print("==============================================================")
+
+
 # ============ new-story ============
 
 
@@ -714,6 +889,7 @@ def main():
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     subparsers.add_parser("init")
+    subparsers.add_parser("onboard")
     subparsers.add_parser("install")
     subparsers.add_parser("uninstall")
     p_install_snippet = subparsers.add_parser("install-snippet")
@@ -745,6 +921,7 @@ def main():
 
     handlers = {
         "init": cmd_init,
+        "onboard": cmd_onboard,
         "install": cmd_install,
         "uninstall": cmd_uninstall,
         "install-snippet": cmd_install_snippet,

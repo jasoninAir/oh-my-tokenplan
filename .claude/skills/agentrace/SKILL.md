@@ -2,8 +2,8 @@
 name: agentrace
 description: |
   Multi-agent collaboration protocol — every agent action leaves a traceable artifact (Story, Review, Decision, Inbox note).
-  Use when the user mentions "story / S-NNN / advance / review / new-story" or works in any project that contains AGENTS.md + docs/agentrace/.
-  Also auto-activate when AGENTS.md exists in the current working directory.
+  Use when the user mentions "story / S-NNN / advance / review / new-story / onboard / set up agentrace" or works in any project that contains AGENTS.md + docs/agentrace/.
+  Also auto-activate when the project has README.md / package.json / pyproject.toml but NO AGENTS.md (suggest onboarding).
 ---
 
 # agentrace — Multi-Agent Collaboration Protocol
@@ -15,9 +15,30 @@ agentrace turns multi-agent development from a coordination problem into a file-
 Auto-activate when **any** of the following is true:
 
 1. Current directory contains `AGENTS.md` and `docs/agentrace/`
-2. User says: "start a story", "advance S-001", "review this", "agentrace resume", "create story for …", "where did I leave off?"
+2. User says: "start a story", "advance S-001", "review this", "agentrace resume", "create story for …", "where did I leave off?", **"onboard this project"**, **"set up agentrace"**, **"new project"**
 3. A git commit message contains `(S-NNN)` referencing a Story ID
-4. A user-level `agentrace` snippet is installed at `~/.claude/CLAUDE.md`
+4. **Project has `README.md` / `package.json` / `pyproject.toml` etc. but NO `AGENTS.md`** → prompt user about onboarding (see §Onboarding below)
+5. A user-level `agentrace` snippet is installed at `~/.claude/CLAUDE.md`
+
+## Onboarding (semi-automatic)
+
+When you detect a project that has source code but no `AGENTS.md`:
+
+1. **Ask the user ONCE**: "This project doesn't have agentrace set up yet. Want me to onboard it? (I'll scan the code, infer modules, create Stories, and fill AGENTS.md — no more questions after that.)"
+2. **If user agrees**, run `bin/agentrace onboard` and **do NOT ask further questions**. The flow is fully automatic from there:
+   - `agentrace init` creates `AGENTS.md` + `docs/agentrace/` skeleton
+   - Heuristic scan writes `.agents/onboarding-plan.yaml` with candidate modules
+   - You (the LLM) read the plan + `README.md` + recent git log
+   - For each candidate, infer:
+     - **Real title** (e.g. `src/auth` → "user authentication")
+     - **Initial status** (commits in last 7 days → `in_progress`; never touched → `planned`; stale → `done`)
+     - **Scope description** (1-2 sentences)
+   - Run `bin/agentrace new-story --title "<real title>"` for each, then patch the generated frontmatter with the inferred status / scope
+   - Run `bin/agentrace sync` to refresh AGENTS.md table
+   - Delete `.agents/onboarding-plan.yaml` (it's transient)
+3. **If user declines**, do nothing this session. Re-prompt next time.
+
+**Onboarding never rewrites git history.** Old commits stay as-is. `related_commits` is backfilled by future `agentrace sync`.
 
 ## Core Concepts
 

@@ -264,6 +264,7 @@ addresses_reviews: []                  # follow-up 时填上轮 ID
 
 ```bash
 init [--example] [--user-snippet]   # 项目初始化
+onboard                              # 【半自动 onboarding】检测 + init + 启发式扫模块 + 生成 plan
 install-snippet [--agent <name>]    # 幂等安装用户级片段
 resume                              # 【核心接力】现场勘查：提取脏工作区、符号影响与测试探针
 triage                              # resume 的别名
@@ -326,3 +327,96 @@ render                              # 生成 OVERVIEW.md
 - **不做**：自动派发任务给云端 Agent（由人类在 Agent 间切换）；自动合并冲突 commit
 - **不做**：Web UI / 复杂服务端云同步
 - **不做**：重型外部依赖（CLI 严格维持 Python 3.10+ 标准库 AST + PyYAML，无重型数据库）
+
+---
+
+## 12. Onboarding 自动化（v0.2 新增）
+
+### 12.1 目标
+
+让 agentrace 接入"无痕"：用户进入一个新项目，只需说一句话，agent 自动完成 onboarding。
+
+### 12.2 半自动 UX
+
+| 阶段 | 自动化程度 | 触发 |
+|------|----------|------|
+| 检测 AGENTS.md | agent 自动 | 每次进入项目 |
+| 提议 onboarding | **唯一征询用户** | agent 发现无 AGENTS.md 时 |
+| 跑 init | 全自动 | 用户同意后 |
+| 启发式扫模块边界 | 全自动 | init 后 |
+| Agent LLM 细化 Story | 全自动 | 启发式输出后 |
+| 创建 Story + 填 AGENTS.md | 全自动 | LLM 细化后 |
+| **不向用户征询任何细节** | — | — |
+
+### 12.3 启发式扫描 (`_detect_modules`)
+
+输入：项目根目录路径
+输出：候选模块列表（每个含 path / 文件数 / commit 频率 / 启发式 confidence）
+
+启发式规则（v0.1）：
+1. **目录结构**：扫 `src/` `lib/` `app/` `pkg/` `internal/` `packages/` 下的顶层子目录（排除 tests / docs / scripts / .git）
+2. **Commit 频率**：跑 `git log --name-only --pretty=format:`，统计每个目录的 commit 数
+3. **包管理文件**：`package.json` deps / `pyproject.toml` / `Cargo.toml` 推断项目类型与技术栈
+
+### 12.4 Plan 输出
+
+`_detect_modules` 结果写到 `.agents/onboarding-plan.yaml`（gitignored）：
+
+```yaml
+project_type: nodejs
+detected_at: 2026-08-17
+modules:
+  - path: src/auth
+    file_count: 12
+    commit_count: 47
+    confidence: 0.9
+  - path: src/articles
+    file_count: 23
+    commit_count: 89
+    confidence: 0.95
+  - path: src/comments
+    file_count: 0
+    commit_count: 0
+    confidence: 0.6
+```
+
+### 12.5 Agent LLM 细化
+
+Agent（拥有 LLM 能力）读：
+1. `README.md` / `package.json` 推断每个模块的真实功能
+2. `.agents/onboarding-plan.yaml` 看候选
+3. `git log --oneline | head -50` 看历史节奏
+
+然后**自己决定**（不征询用户）：
+- 每个 Story 的真实标题（如 `src/auth` → "用户认证"）
+- 每个 Story 的初始 status（git log 最近 7 天有 commit → in_progress；从未 commit → planned；commit 很久没新 → done）
+- 范围描述（1-2 句话）
+
+### 12.6 不改 git history
+
+onboarding **不**修改任何已有 commit message。`related_commits` 字段由后续 `agentrace sync` 自动从 git log 收集。
+
+### 12.7 触发机制
+
+用户级片段（`~/.claude/CLAUDE.md`）加：
+
+```
+4.5. 项目首次 onboarding 检测：
+  - 进入项目根目录后，ls AGENTS.md
+  - 不存在且看到 README.md / package.json / pyproject.toml 等项目标识 →
+    主动询问用户"这个项目还没接入 agentrace，是否 onboarding？"
+  - 用户同意后自动跑 `bin/agentrace onboard`，不再征询细节
+```
+
+Skill description 加：
+
+```
+Use ALSO when the user says "onboard / set up agentrace / new project"
+or when project has README + src/ but NO AGENTS.md
+```
+
+### 12.8 失败与回退
+
+- `_detect_modules` 返回空（项目结构不标准）→ onboard 仍创建 AGENTS.md 占位，提示用户手动建 Story
+- LLM 细化超时/失败 → 用启发式原始结果（path 作标题）
+- 用户拒绝 onboarding → 啥也不做，下次进入再问一次

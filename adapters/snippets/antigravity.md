@@ -12,5 +12,10 @@
 6. Reviewer 只写 `docs/agentrace/reviews/`、`inbox/`、`decisions/` 三个目录
 7. 接手前读 `docs/agentrace/inbox/` 看是否有上一个 Agent 留下的便条
 
-如果项目根目录**没有** `AGENTS.md`：按默认 Antigravity 流程工作。
+如果项目根目录**没有** `AGENTS.md` 但有 `README.md` / `package.json` / `pyproject.toml`：
+- **Onboarding 检测**：主动询问用户一次"是否 onboarding？（自动扫代码 → 拆 Story → 填 AGENTS.md，全程不再询问）"
+- 用户同意后跑 `bin/agentrace onboard`，**不再征询任何细节**
+- 用户拒绝则啥也不做，下次进入再问
+
+如果项目根目录**没有**任何项目标识：按默认 Antigravity 流程工作。
 <!-- END agentrace-protocol v0.1 -->
