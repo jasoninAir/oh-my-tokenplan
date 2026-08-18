@@ -4,9 +4,11 @@
 >
 > Multi-agent collaboration protocol for AI coding assistants. When one agent hits a quota wall, the next one picks up in 20 seconds — no context lost, no work duplicated.
 
+[English](README.md) | [简体中文](README_zh.md)
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![Tests: 24 passing](https://img.shields.io/badge/tests-24%20passing-brightgreen.svg)](bin/tests/)
+[![Tests: 39 passing](https://img.shields.io/badge/tests-39%20passing-brightgreen.svg)](bin/tests/)
 [![Claude Code Skill](https://img.shields.io/badge/Claude%20Code-Skill-orange.svg)](.claude/skills/agentrace/SKILL.md)
 
 ---
@@ -36,7 +38,7 @@ Or: You're on a long-running project. Different days, different agents, differen
 
 ```bash
 # Install once (Claude Code Skill + user-level snippet)
-git clone https://github.com/yourname/agentrace.git
+git clone https://github.com/jasoninAir/oh-my-tokenplan.git agentrace
 cd agentrace
 bin/agentrace install
 
@@ -127,6 +129,7 @@ draft ──→ planned ──→ in_progress ──→ in_review ──→ done
 
 ```bash
 agentrace init                    # Initialize agentrace in current project
+agentrace onboard                 # Semi-automatic scan & onboarding plan generator
 agentrace install                 # Install skill + snippet globally
 agentrace uninstall               # Reverse install
 agentrace install-snippet         # Idempotent snippet install (per-agent)
@@ -149,7 +152,7 @@ agentrace impact <symbol>         # AST-based blast-radius analysis
 ### As a Claude Code Skill (recommended)
 
 ```bash
-git clone https://github.com/yourname/agentrace.git
+git clone https://github.com/jasoninAir/oh-my-tokenplan.git agentrace
 cd agentrace
 bin/agentrace install
 ```
@@ -179,10 +182,10 @@ See `examples/calculator/` — a 60-line Python library that demonstrates the fu
 
 ```bash
 cd examples/calculator
-../bin/agentrace check --strict
+../../bin/agentrace check --strict
 # → check: passed (4 stories, 3 reviews)
 
-../bin/agentrace resume
+../../bin/agentrace resume
 # → 20-line briefing showing current Story + dirty workspace + AST symbols + test status
 ```
 
