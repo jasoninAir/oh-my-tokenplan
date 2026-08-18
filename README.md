@@ -1,4 +1,4 @@
-# agentrace
+# Agentrace
 
 > **Every agent action leaves a trace.**
 >
