@@ -53,12 +53,15 @@ When you detect a project that has source code but no `AGENTS.md`:
 
 ```bash
 agentrace init                    # initialize agentrace in a project (writes AGENTS.md + templates)
+agentrace onboard                 # semi-automatic onboarding: init + heuristic scan + plan (no AGENTS.md required)
 agentrace install                 # install skill + user-level snippet globally
+agentrace uninstall               # reverse install
 agentrace install-snippet         # idempotently install user-level snippet only
 agentrace new-story --title "…"   # create S-NNN-<slug>.md with frontmatter filled
 agentrace new-review S-001        # create R-NNN-on-S-001.md for review
 agentrace advance S-001 in_progress   # state machine: only legal transitions allowed
 agentrace resume                  # post-mortem triage: dirty workspace + AST symbols + test probe
+agentrace triage                  # alias for resume
 agentrace impact <symbol>         # blast-radius analysis via Python ast
 agentrace sync                    # refresh AGENTS.md "active stories" table + write impacted_symbols
 agentrace check [--strict]        # validate frontmatter, references, state machine integrity
@@ -164,8 +167,8 @@ No agent needs to know it was the previous one — just read the briefing and co
 
 ## Where to Learn More
 
-- Protocol spec: `docs/superpowers/specs/2026-08-17-multiagent-protocol-design.md`
-- Implementation plan: `docs/superpowers/plans/2026-08-17-multiagent-protocol.md`
+- v0.1 design spec (historical filename): `docs/superpowers/specs/2026-08-17-multiagent-protocol-design.md`
+- Implementation plan (historical filename): `docs/superpowers/plans/2026-08-17-multiagent-protocol.md`
 - Story lifecycle: `docs/agentrace/handbook/story-lifecycle.md`
 - Review protocol: `docs/agentrace/handbook/review-protocol.md`
 - Relay & triage: `docs/agentrace/handbook/relay-and-triage.md`
